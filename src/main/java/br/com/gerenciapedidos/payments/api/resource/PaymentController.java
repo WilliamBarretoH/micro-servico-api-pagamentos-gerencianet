@@ -1,47 +1,57 @@
 package br.com.gerenciapedidos.payments.api.resource;
 
-
 import br.com.gerencianet.gnsdk.Gerencianet;
 import br.com.gerencianet.gnsdk.exceptions.GerencianetException;
-
+import br.com.gerenciapedidos.payments.domain.entity.CardRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import sun.security.krb5.Credentials;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 
-
+@PropertySource("classpath:application.properties")
 @RestController
 public class PaymentController {
 
+    //variaveis de ambiente - application.properties
+    @Value("${app.id}")
+    private String client_id;
+    @Value("${app.secret}")
+    private String client_secret;
 
-    @RequestMapping(value = "/payment/process", method = RequestMethod.GET)
-    public ResponseEntity<?> processPayment(){
+    @PostMapping("/payment")
+    public ResponseEntity<CardRequest> processPayment(@RequestBody CardRequest cardRequest){
 
         try {
-            /* autenticar  */
+            //autenticacao
             JSONObject options = new JSONObject();
-            options.put("client_id", "Client_Id_6e719da62a14c266dc61cb39d13269e8c82d7db9");
-            options.put("client_secret", "Client_Id_6e719da62a14c266dc61cb39d13269e8c82d7db9");
+            options.put("client_id", client_id);
+            options.put("client_secret", client_secret);
             options.put("sandbox", true);
 
+            //criar transacao
             Gerencianet gn = new Gerencianet(options);
-            //
-            //implementar a cobranca
-            //
+            JSONObject body = new JSONObject();
+            body.put("items", new JSONArray(cardRequest.getItems()));
+            JSONObject response = gn.call("createCharge", new HashMap<String, String>(), body);
 
-            System.out.println(gn);
+            System.out.println("entrou na rota");
+            System.out.println(cardRequest.getItems().toString());
 
         } catch(GerencianetException e) {
-            /* Gerencianet's api errors will come here */
+            System.out.println(e.getCode());
+            System.out.println(e.getError());
+            System.out.println(e.getErrorDescription());
         } catch(Exception ex) {
-            /* Other errors will come here */
+            System.out.println(ex.getMessage());
         }
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity(cardRequest.getItems(), HttpStatus.OK);
     }
 
     public static void main(String[] args) {

@@ -1,8 +1,4 @@
-# Simple-crud-SpringBoot-2.4
-
-## Estudo de caso
-
-Construcao de uma API simples com alguns padroes de projetos utilizando SpringBoot2.4 e H2Database.
+# MicroServico para cobranca do GerenciaPedidos utilizando API do GerenciaNET
 
 ### Estrutura de Packages
 
@@ -14,4 +10,10 @@ Construcao de uma API simples com alguns padroes de projetos utilizando SpringBo
 
 * Service: Todos os serviços onde estão as regras de negócio, validações e o que mais for preciso.
 
+###Atividades
+
+- [x] Rota de criar transacao.
+- [x] Retornar objeto enviado no HTTP Response.
+- [x] Variaveis de autenticacao de forma abstrata no ambiente.
+   
 
