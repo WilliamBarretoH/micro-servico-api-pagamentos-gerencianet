@@ -8,6 +8,7 @@ public class Billing_address {
     private String street;
     private String neighborhood;
     private String state;
+    private String complement;
 
     public String getZipcode() {
         return zipcode;
@@ -55,5 +56,13 @@ public class Billing_address {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getComplement() {
+        return complement;
+    }
+
+    public void setComplement(String complement) {
+        this.complement = complement;
     }
 }

@@ -1,5 +1,8 @@
 package br.com.gerenciapedidos.payments.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
+
+@JsonRootName("credit_card")
 public class CreditCard {
 
     private Integer installments;

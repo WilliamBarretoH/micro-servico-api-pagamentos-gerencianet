@@ -11,12 +11,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 
 @PropertySource("classpath:application.properties")
 @RestController
+@RequestMapping("v1")
 public class PaymentController {
 
     //variaveis de ambiente - application.properties
@@ -24,25 +26,45 @@ public class PaymentController {
     private String client_id;
     @Value("${app.secret}")
     private String client_secret;
+    @Value("${app.sandbox}")
+    private String sandbox;
 
-    @PostMapping("/payment")
-    public ResponseEntity<CardRequest> processPayment(@RequestBody CardRequest cardRequest){
+    @PostMapping(value = "/charge", produces = "application/json")
+    public ResponseEntity<?> createCharge(@RequestBody CardRequest cardRequest){
+
 
         try {
             //autenticacao
             JSONObject options = new JSONObject();
             options.put("client_id", client_id);
             options.put("client_secret", client_secret);
-            options.put("sandbox", true);
+            options.put("sandbox", sandbox);
 
-            //criar transacao
+            //realiza pagamento da transacao
             Gerencianet gn = new Gerencianet(options);
             JSONObject body = new JSONObject();
             body.put("items", new JSONArray(cardRequest.getItems()));
             JSONObject response = gn.call("createCharge", new HashMap<String, String>(), body);
+            if(response != null) {
+                System.out.println("entrou na rota");
+                System.out.println(response);
+                //acessando o charge_id do response da API
+                System.out.println(response.getJSONObject("data").getInt("charge_id"));
 
-            System.out.println("entrou na rota");
-            System.out.println(cardRequest.getItems().toString());
+                System.out.println("Items: "+cardRequest.getItems().toString());
+                System.out.println("Payment: "+cardRequest.getPayment().toString());
+                body = new JSONObject();
+                body.put("payment", new JSONObject(cardRequest.getPayment()));
+                HashMap<String, String> params = new HashMap<String, String>();
+                params.put("id", String.valueOf(response.getJSONObject("data").getInt("charge_id")));
+                System.out.println(params.toString());
+                JSONObject responsePayCharge = gn.call("payCharge", params, body);
+
+
+                return new ResponseEntity(responsePayCharge.toString(), HttpStatus.CREATED);
+            }else {
+                return new ResponseEntity(HttpStatus.NO_CONTENT);
+            }
 
         } catch(GerencianetException e) {
             System.out.println(e.getCode());
@@ -51,8 +73,9 @@ public class PaymentController {
         } catch(Exception ex) {
             System.out.println(ex.getMessage());
         }
-        return new ResponseEntity(cardRequest.getItems(), HttpStatus.OK);
+            return new ResponseEntity(HttpStatus.OK);
     }
+
 
     public static void main(String[] args) {
         /* *********  Set credentials parameters ******** */
