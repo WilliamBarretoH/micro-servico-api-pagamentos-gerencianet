@@ -3,22 +3,23 @@ package br.com.gerenciapedidos.payments.api.resource;
 import br.com.gerencianet.gnsdk.Gerencianet;
 import br.com.gerencianet.gnsdk.exceptions.GerencianetException;
 import br.com.gerenciapedidos.payments.domain.entity.CardRequest;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 
 @PropertySource("classpath:application.properties")
 @RestController
-@RequestMapping("v1")
+@RequestMapping("/v1")
+@Api(value = "")
+@CrossOrigin(origins = "*")
 public class PaymentController {
 
     //variaveis de ambiente - application.properties
@@ -29,6 +30,7 @@ public class PaymentController {
     @Value("${app.sandbox}")
     private String sandbox;
 
+    @ApiOperation(value = "Realiza transacao")
     @PostMapping(value = "/charge", produces = "application/json")
     public ResponseEntity<?> createCharge(@RequestBody CardRequest cardRequest){
 
