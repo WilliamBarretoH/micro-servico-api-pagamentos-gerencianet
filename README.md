@@ -15,5 +15,6 @@
 - [x] Rota de criar transacao.
 - [x] Retornar objeto enviado no HTTP Response.
 - [x] Variaveis de autenticacao de forma abstrata no ambiente.
-   
+- [x] Rota de pagar transacao
+- [ ] Documentacao do Swagger  
 
