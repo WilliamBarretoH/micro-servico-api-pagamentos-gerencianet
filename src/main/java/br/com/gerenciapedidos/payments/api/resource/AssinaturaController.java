@@ -2,10 +2,7 @@ package br.com.gerenciapedidos.payments.api.resource;
 
 import br.com.gerencianet.gnsdk.Gerencianet;
 import br.com.gerencianet.gnsdk.exceptions.GerencianetException;
-import br.com.gerenciapedidos.payments.domain.entity.Item;
-import br.com.gerenciapedidos.payments.domain.entity.Payment;
-import br.com.gerenciapedidos.payments.domain.entity.Plan;
-import br.com.gerenciapedidos.payments.domain.entity.SubscriptionRequest;
+import br.com.gerenciapedidos.payments.domain.entity.*;
 import br.com.gerenciapedidos.payments.service.interfaces.CredentialsService;
 import br.com.gerenciapedidos.payments.service.interfaces.ItemService;
 import br.com.gerenciapedidos.payments.service.interfaces.JsonService;
@@ -96,18 +93,19 @@ public class AssinaturaController {
     }
 
     @ApiOperation(value = "Cria e paga assinatura por cartao de credito vinculando-a em um plano")
-    @PostMapping(value = "/pagamento/assinatura", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<?> criarAssinatura(@RequestBody SubscriptionRequest subscriptionRequest){
+    @PostMapping(value = "/pagamento/{plan_id}/assinatura", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<?> criarAssinatura(@RequestBody SubscriptionRequest subscriptionRequest,
+                                             @PathVariable(value = "plan_id") String plan_id){
 
         try {
             JSONObject options = credentialsService.buildCredentials(client_id, client_secret, sandbox);
             JSONArray itemsArray = itemService.buildItemToArray(subscriptionRequest.getItems());
             JSONObject body = new JSONObject();
             body.put("items", itemsArray);
-            HashMap<String, String> plan_id = new HashMap<String, String>();
-            plan_id.put("id", "7172");
+            HashMap<String, String> plan_id_hash = new HashMap<String, String>();
+            plan_id_hash.put("id", plan_id);
             Gerencianet gn = new Gerencianet(options);
-            JSONObject subscription = gn.call("createSubscription", plan_id, body);
+            JSONObject subscription = gn.call("createSubscription", plan_id_hash, body);
             if(subscription != null){
                 body = new JSONObject();
                 body.put("payment", new JSONObject(subscriptionRequest.getPayment()));
@@ -129,5 +127,7 @@ public class AssinaturaController {
 
         return new ResponseEntity(HttpStatus.OK);
     }
+
+
 
 }
