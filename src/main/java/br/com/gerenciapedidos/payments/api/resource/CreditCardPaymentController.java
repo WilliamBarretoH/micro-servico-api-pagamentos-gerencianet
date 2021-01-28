@@ -35,8 +35,8 @@ public class CreditCardPaymentController {
     private String sandbox;
 
     @ApiOperation(value = "Realiza pagamento por cartao de credito")
-    @PostMapping(value = "/creditcardpayment", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<?> creditCardPayment(@RequestBody CardRequest cardRequest){
+    @PostMapping(value = "/pagamento/cartao", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<?> pagarTransacaoComCartao(@RequestBody CardRequest cardRequest){
 
         try {
             //autenticacao

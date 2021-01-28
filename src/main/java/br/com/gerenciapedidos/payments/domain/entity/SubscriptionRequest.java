@@ -4,31 +4,22 @@ import java.util.List;
 
 public class SubscriptionRequest {
 
-    private Payment payment;
-    private List<Item> items;
-    private Plan plan;
+    private PaymentSubscription payment;
+    private Item items;
 
-    public Payment getPayment() {
+    public PaymentSubscription getPayment() {
         return payment;
     }
 
-    public void setPayment(Payment payment) {
+    public void setPayment(PaymentSubscription payment) {
         this.payment = payment;
     }
 
-    public List<Item> getItems() {
+    public Item getItems() {
         return items;
     }
 
-    public void setItems(List<Item> items) {
+    public void setItems(Item items) {
         this.items = items;
-    }
-
-    public Plan getPlan() {
-        return plan;
-    }
-
-    public void setPlan(Plan plan) {
-        this.plan = plan;
     }
 }
