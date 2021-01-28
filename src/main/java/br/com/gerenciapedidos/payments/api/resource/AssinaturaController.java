@@ -25,7 +25,7 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/v1")
 @CrossOrigin(origins = "*")
-public class SubscriptionPaymentController {
+public class AssinaturaController {
 
     @Autowired
     CredentialsService credentialsService;
@@ -43,7 +43,7 @@ public class SubscriptionPaymentController {
     @Value("${app.sandbox}")
     private String sandbox;
 
-    @ApiOperation(value = "realiza pagamento por assinatura")
+    @ApiOperation(value = "Cria novo plano de assinatura")
     @PostMapping(value = "/planos/novo", produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> criarPlano(@RequestBody Plan plan){
 

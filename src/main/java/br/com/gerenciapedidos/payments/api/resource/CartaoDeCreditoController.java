@@ -25,7 +25,7 @@ import java.util.HashMap;
 @RequestMapping("/v1")
 @Api(value = "")
 @CrossOrigin(origins = "*")
-public class CreditCardPaymentController {
+public class CartaoDeCreditoController {
 
     @Autowired(required = true)
     CredentialsService credentialsService;

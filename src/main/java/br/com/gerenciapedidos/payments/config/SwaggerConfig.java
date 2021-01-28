@@ -25,9 +25,8 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Serviço para realizar pagamentos com cartão de crédito")
-                .description("Utilizando a API do gerencianet.com, esse microServico realiza " +
-                        "uma transação de cartão de crédito de forma simples e rápida")
+                .title("Serviço de pagamentos")
+                .description("Serviço do GerenciaPedidos para realizar pagamentos de cartão e assinatura recorrente")
                 .build();
     }
 
