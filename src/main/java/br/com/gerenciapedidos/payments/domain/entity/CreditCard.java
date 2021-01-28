@@ -1,12 +1,16 @@
 package br.com.gerenciapedidos.payments.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
+import io.swagger.annotations.ApiModelProperty;
 
 @JsonRootName("credit_card")
 public class CreditCard {
 
+    @ApiModelProperty(value = "Numero de parcelas")
     private Integer installments;
+    @ApiModelProperty(value = "Token gerado pela API para confirmar transacao")
     private String payment_token;
+    @ApiModelProperty(value = "desconto do pagamento")
     private Discount discount;
     private Billing_address billing_address;
     private Customer customer;

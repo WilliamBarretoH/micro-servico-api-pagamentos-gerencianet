@@ -2,8 +2,8 @@ package br.com.gerenciapedidos.payments.domain.entity;
 
 public class Items {
 
-    private Integer amount;
     private String name;
+    private Integer amount;
     private Integer value;
 
     public Integer getAmount() {
@@ -33,8 +33,8 @@ public class Items {
     @Override
     public String toString() {
         return "Items{" +
-                "amount=" + amount +
-                ", name='" + name + '\'' +
+                "name='" + name + '\'' +
+                ", amount=" + amount +
                 ", value=" + value +
                 '}';
     }

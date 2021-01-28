@@ -25,9 +25,9 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("MicroServico SpringBoot para realizar pagamentos com cartao de credito")
+                .title("Serviço para realizar pagamentos com cartão de crédito")
                 .description("Utilizando a API do gerencianet.com, esse microServico realiza " +
-                        "uma transacao de cartao de credito de forma simples e rapida")
+                        "uma transação de cartão de crédito de forma simples e rápida")
                 .build();
     }
 

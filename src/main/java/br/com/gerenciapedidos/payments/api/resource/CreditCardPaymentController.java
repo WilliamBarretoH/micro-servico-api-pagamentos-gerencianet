@@ -2,7 +2,9 @@ package br.com.gerenciapedidos.payments.api.resource;
 
 import br.com.gerencianet.gnsdk.Gerencianet;
 import br.com.gerencianet.gnsdk.exceptions.GerencianetException;
+import br.com.gerenciapedidos.payments.config.CredentialsAuthentication;
 import br.com.gerenciapedidos.payments.domain.entity.CardRequest;
+import br.com.gerenciapedidos.payments.domain.entity.Plan;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.json.JSONArray;
@@ -20,9 +22,11 @@ import java.util.HashMap;
 @RequestMapping("/v1")
 @Api(value = "")
 @CrossOrigin(origins = "*")
-public class PaymentController {
+public class CreditCardPaymentController {
 
     //variaveis de ambiente - application.properties
+    CredentialsAuthentication credentialsAuthentication = new CredentialsAuthentication();
+
     @Value("${app.id}")
     private String client_id;
     @Value("${app.secret}")
@@ -30,15 +34,14 @@ public class PaymentController {
     @Value("${app.sandbox}")
     private String sandbox;
 
-    @ApiOperation(value = "Realiza transacao")
-    @PostMapping(value = "/charge", produces = "application/json")
-    public ResponseEntity<?> createCharge(@RequestBody CardRequest cardRequest){
-
+    @ApiOperation(value = "Realiza pagamento por cartao de credito")
+    @PostMapping(value = "/creditcardpayment", produces = "application/json", consumes = "application/json")
+    public ResponseEntity<?> creditCardPayment(@RequestBody CardRequest cardRequest){
 
         try {
             //autenticacao
             JSONObject options = new JSONObject();
-            options.put("client_id", client_id);
+            options.put("client_id",client_id);
             options.put("client_secret", client_secret);
             options.put("sandbox", sandbox);
 
@@ -48,6 +51,7 @@ public class PaymentController {
             body.put("items", new JSONArray(cardRequest.getItems()));
             //endpoint para criacao da transacao
             JSONObject response = gn.call("createCharge", new HashMap<String, String>(), body);
+
             if(response != null) {
                 System.out.println("entrou na rota");
                 System.out.println(response);
@@ -78,4 +82,5 @@ public class PaymentController {
         }
             return new ResponseEntity(HttpStatus.OK);
     }
+
 }
