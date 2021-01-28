@@ -6,9 +6,13 @@ import br.com.gerenciapedidos.payments.domain.entity.Item;
 import br.com.gerenciapedidos.payments.domain.entity.Payment;
 import br.com.gerenciapedidos.payments.domain.entity.Plan;
 import br.com.gerenciapedidos.payments.domain.entity.SubscriptionRequest;
+import br.com.gerenciapedidos.payments.service.interfaces.CredentialsService;
+import br.com.gerenciapedidos.payments.service.interfaces.ItemService;
+import br.com.gerenciapedidos.payments.service.interfaces.JsonService;
 import io.swagger.annotations.ApiOperation;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
@@ -20,7 +24,17 @@ import java.util.HashMap;
 @PropertySource("classpath:application.properties")
 @RestController
 @RequestMapping("/v1")
+@CrossOrigin(origins = "*")
 public class SubscriptionPaymentController {
+
+    @Autowired
+    CredentialsService credentialsService;
+
+    @Autowired
+    ItemService itemService;
+
+    @Autowired
+    JsonService jsonService;
 
     @Value("${app.id}")
     private String client_id;
@@ -35,10 +49,7 @@ public class SubscriptionPaymentController {
 
         try {
 
-            JSONObject options = new JSONObject();
-            options.put("client_id", client_id);
-            options.put("client_secret", client_secret);
-            options.put("sandbox", sandbox);
+            JSONObject options = credentialsService.buildCredentials(client_id, client_secret, sandbox);
 
             Gerencianet gn = new Gerencianet(options);
             JSONObject body = new JSONObject();
@@ -67,20 +78,11 @@ public class SubscriptionPaymentController {
     @GetMapping(value = "/planos", produces = "application/json")
     public ResponseEntity<?> listaPlano(){
 
-        JSONObject options = new JSONObject();
-        options.put("client_id", client_id);
-        options.put("client_secret", client_secret);
-        options.put("sandbox", sandbox);
-
-        /* ************************************************* */
-
+        JSONObject options = credentialsService.buildCredentials(client_id, client_secret, sandbox);
         HashMap<String, String> params = new HashMap<String, String>();
-
         try {
             Gerencianet gn = new Gerencianet(options);
             JSONObject plans = gn.call("getPlans", params, new JSONObject());
-            System.out.println(plans);
-
             return new ResponseEntity(plans.toString(), HttpStatus.OK);
         }catch (GerencianetException e){
             System.out.println(e.getCode());
@@ -98,31 +100,19 @@ public class SubscriptionPaymentController {
     public ResponseEntity<?> criarAssinatura(@RequestBody SubscriptionRequest subscriptionRequest){
 
         try {
-            JSONObject options = new JSONObject();
-            options.put("client_id", client_id);
-            options.put("client_secret", client_secret);
-            options.put("sandbox", sandbox);
-
-            JSONArray itemsArray = buildJSONArray(subscriptionRequest.getItems());
-            System.out.println(subscriptionRequest.getItems());
-
+            JSONObject options = credentialsService.buildCredentials(client_id, client_secret, sandbox);
+            JSONArray itemsArray = itemService.buildItemToArray(subscriptionRequest.getItems());
             JSONObject body = new JSONObject();
             body.put("items", itemsArray);
-            System.out.println(body);
-
             HashMap<String, String> plan_id = new HashMap<String, String>();
             plan_id.put("id", "7172");
-
             Gerencianet gn = new Gerencianet(options);
             JSONObject subscription = gn.call("createSubscription", plan_id, body);
-            System.out.println(subscription);
-            System.out.println(subscription.getJSONObject("data").getInt("subscription_id"));
-
             if(subscription != null){
                 body = new JSONObject();
                 body.put("payment", new JSONObject(subscriptionRequest.getPayment()));
                 HashMap<String, String> subscription_id = new HashMap<String, String>();
-                subscription_id.put("id", String.valueOf(subscription.getJSONObject("data").getInt("subscription_id")));
+                subscription_id.put("id", jsonService.getIdFromJsonResponse(subscription, "data", "subscription_id"));
                 JSONObject payResponse = gn.call("paySubscription", subscription_id, body);
                 return new ResponseEntity(payResponse.toString(), HttpStatus.CREATED);
             }else{
@@ -140,15 +130,4 @@ public class SubscriptionPaymentController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    private JSONArray buildJSONArray(Item item) {
-        JSONArray itemsArray = new JSONArray();
-
-        JSONObject item1 = new JSONObject();
-        item1.put("name", item.getName());
-        item1.put("amount", item.getAmount());
-        item1.put("value", item.getValue());
-
-        itemsArray.put(item1);
-        return itemsArray;
-    }
 }

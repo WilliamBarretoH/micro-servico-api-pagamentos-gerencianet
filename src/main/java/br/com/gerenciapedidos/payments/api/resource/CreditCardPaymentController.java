@@ -5,10 +5,13 @@ import br.com.gerencianet.gnsdk.exceptions.GerencianetException;
 import br.com.gerenciapedidos.payments.config.CredentialsAuthentication;
 import br.com.gerenciapedidos.payments.domain.entity.CardRequest;
 import br.com.gerenciapedidos.payments.domain.entity.Plan;
+import br.com.gerenciapedidos.payments.service.interfaces.CredentialsService;
+import br.com.gerenciapedidos.payments.service.interfaces.JsonService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
@@ -24,8 +27,11 @@ import java.util.HashMap;
 @CrossOrigin(origins = "*")
 public class CreditCardPaymentController {
 
-    //variaveis de ambiente - application.properties
-    CredentialsAuthentication credentialsAuthentication = new CredentialsAuthentication();
+    @Autowired(required = true)
+    CredentialsService credentialsService;
+
+    @Autowired
+    JsonService jsonService;
 
     @Value("${app.id}")
     private String client_id;
@@ -39,34 +45,18 @@ public class CreditCardPaymentController {
     public ResponseEntity<?> pagarTransacaoComCartao(@RequestBody CardRequest cardRequest){
 
         try {
-            //autenticacao
-            JSONObject options = new JSONObject();
-            options.put("client_id",client_id);
-            options.put("client_secret", client_secret);
-            options.put("sandbox", sandbox);
-
-            //realiza pagamento da transacao
+            JSONObject options = credentialsService.buildCredentials(client_id, client_secret, sandbox);
             Gerencianet gn = new Gerencianet(options);
             JSONObject body = new JSONObject();
             body.put("items", new JSONArray(cardRequest.getItems()));
-            //endpoint para criacao da transacao
             JSONObject response = gn.call("createCharge", new HashMap<String, String>(), body);
-
             if(response != null) {
-                System.out.println("entrou na rota");
-                System.out.println(response);
-                //acessando o charge_id do response da API
-                System.out.println(response.getJSONObject("data").getInt("charge_id"));
-                System.out.println("Items: "+cardRequest.getItems().toString());
-                System.out.println("Payment: "+cardRequest.getPayment().toString());
                 body = new JSONObject();
                 body.put("payment", new JSONObject(cardRequest.getPayment()));
-                HashMap<String, String> params = new HashMap<String, String>();
-                params.put("id", String.valueOf(response.getJSONObject("data").getInt("charge_id")));
-                System.out.println(params.toString());
-                //endpoint para pagamento da transacao
-                JSONObject responsePayCharge = gn.call("payCharge", params, body);
-
+                HashMap<String, String> charge_id = new HashMap<String, String>();
+                charge_id.put("id", String.valueOf(response.getJSONObject("data").getInt("charge_id")));
+                charge_id.put("id", jsonService.getIdFromJsonResponse(response, "data", "charge_id"));
+                JSONObject responsePayCharge = gn.call("payCharge", charge_id, body);
 
                 return new ResponseEntity(responsePayCharge.toString(), HttpStatus.CREATED);
             }else {
