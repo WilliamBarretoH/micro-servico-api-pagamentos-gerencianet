@@ -5,7 +5,7 @@ import java.util.List;
 public class SubscriptionRequest {
 
     private Payment payment;
-    private List<Items> items;
+    private List<Item> items;
     private Plan plan;
 
     public Payment getPayment() {
@@ -16,11 +16,11 @@ public class SubscriptionRequest {
         this.payment = payment;
     }
 
-    public List<Items> getItems() {
+    public List<Item> getItems() {
         return items;
     }
 
-    public void setItems(List<Items> items) {
+    public void setItems(List<Item> items) {
         this.items = items;
     }
 

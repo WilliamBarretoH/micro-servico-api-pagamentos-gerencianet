@@ -2,10 +2,9 @@ package br.com.gerenciapedidos.payments.api.resource;
 
 import br.com.gerencianet.gnsdk.Gerencianet;
 import br.com.gerencianet.gnsdk.exceptions.GerencianetException;
-import br.com.gerenciapedidos.payments.domain.entity.Items;
+import br.com.gerenciapedidos.payments.domain.entity.Item;
 import br.com.gerenciapedidos.payments.domain.entity.Plan;
 import io.swagger.annotations.ApiOperation;
-import org.apache.tomcat.util.json.JSONParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,9 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 @PropertySource("classpath:application.properties")
 @RestController
@@ -96,7 +93,7 @@ public class SubscriptionPaymentController {
 
     @ApiOperation(value = "Cria assinatura vinculando-a em um plano")
     @PostMapping(value = "/subscription", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<?> subscription(@RequestBody Items items){
+    public ResponseEntity<?> subscription(@RequestBody Item item){
 
         try {
             JSONObject options = new JSONObject();
@@ -107,14 +104,14 @@ public class SubscriptionPaymentController {
             JSONArray itemsArray = new JSONArray();
 
             JSONObject item1 = new JSONObject();
-            item1.put("name", items.getName());
-            item1.put("amount", items.getAmount());
-            item1.put("value", items.getValue());
+            item1.put("name", item.getName());
+            item1.put("amount", item.getAmount());
+            item1.put("value", item.getValue());
 
             itemsArray.put(item1);
 
-            System.out.println(items);
-            JSONObject jsonObject = new JSONObject(items);
+            System.out.println(item);
+            JSONObject jsonObject = new JSONObject(item);
             System.out.println(jsonObject);
             JSONObject body = new JSONObject();
             body.put("items", itemsArray);

@@ -1,6 +1,6 @@
 package br.com.gerenciapedidos.payments.domain.entity;
 
-public class Items {
+public class Item {
 
     private String name;
     private Integer amount;
