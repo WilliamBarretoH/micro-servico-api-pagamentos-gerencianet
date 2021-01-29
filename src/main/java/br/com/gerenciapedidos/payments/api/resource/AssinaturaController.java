@@ -2,7 +2,8 @@ package br.com.gerenciapedidos.payments.api.resource;
 
 import br.com.gerencianet.gnsdk.Gerencianet;
 import br.com.gerencianet.gnsdk.exceptions.GerencianetException;
-import br.com.gerenciapedidos.payments.domain.entity.*;
+import br.com.gerenciapedidos.payments.domain.entity.Plan;
+import br.com.gerenciapedidos.payments.domain.entity.SubscriptionRequest;
 import br.com.gerenciapedidos.payments.service.interfaces.CredentialsService;
 import br.com.gerenciapedidos.payments.service.interfaces.ItemService;
 import br.com.gerenciapedidos.payments.service.interfaces.JsonService;
@@ -17,12 +18,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @PropertySource("classpath:application.properties")
 @RestController
 @RequestMapping("/v1")
 @CrossOrigin(origins = "*")
 public class AssinaturaController {
+
+    private static Logger LOG = Logger.getLogger(AssinaturaController.class.getName());
 
     @Autowired
     CredentialsService credentialsService;
@@ -33,12 +38,6 @@ public class AssinaturaController {
     @Autowired
     JsonService jsonService;
 
-    @Value("${app.id}")
-    private String client_id;
-    @Value("${app.secret}")
-    private String client_secret;
-    @Value("${app.sandbox}")
-    private String sandbox;
 
     @ApiOperation(value = "Cria novo plano de assinatura")
     @PostMapping(value = "/planos/novo", produces = "application/json", consumes = "application/json")
@@ -46,7 +45,7 @@ public class AssinaturaController {
 
         try {
 
-            JSONObject options = credentialsService.buildCredentials(client_id, client_secret, sandbox);
+            JSONObject options = credentialsService.getCredentials();
 
             Gerencianet gn = new Gerencianet(options);
             JSONObject body = new JSONObject();
@@ -55,17 +54,13 @@ public class AssinaturaController {
             body.put("repeats", plan.getRepeats());
 
             JSONObject response = gn.call("createPlan", new HashMap<String, String>(), body);
-            System.out.println(response.toString());
 
             return new ResponseEntity(response.toString(), HttpStatus.CREATED);
 
         }catch (GerencianetException e){
-            System.out.println(e.getCode());
-            System.out.println(e.getError());
-            System.out.println(e.getErrorDescription());
-        } catch (Exception ex){
-            System.out.println(ex.getMessage());
-
+            LOG.log(Level.SEVERE, e.getMessage());
+            return new ResponseEntity(e.getErrorDescription(),HttpStatus.INTERNAL_SERVER_ERROR);        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return new ResponseEntity(HttpStatus.OK);
@@ -75,18 +70,17 @@ public class AssinaturaController {
     @GetMapping(value = "/planos", produces = "application/json")
     public ResponseEntity<?> listaPlano(){
 
-        JSONObject options = credentialsService.buildCredentials(client_id, client_secret, sandbox);
+        JSONObject options = credentialsService.getCredentials();
         HashMap<String, String> params = new HashMap<String, String>();
         try {
             Gerencianet gn = new Gerencianet(options);
             JSONObject plans = gn.call("getPlans", params, new JSONObject());
             return new ResponseEntity(plans.toString(), HttpStatus.OK);
         }catch (GerencianetException e){
-            System.out.println(e.getCode());
-            System.out.println(e.getError());
-            System.out.println(e.getErrorDescription());
-        }catch (Exception e) {
-            System.out.println(e.getMessage());
+            LOG.log(Level.SEVERE, e.getMessage());
+            return new ResponseEntity(e.getErrorDescription(),HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return new ResponseEntity(HttpStatus.OK);
@@ -98,7 +92,7 @@ public class AssinaturaController {
                                              @PathVariable(value = "plan_id") String plan_id){
 
         try {
-            JSONObject options = credentialsService.buildCredentials(client_id, client_secret, sandbox);
+            JSONObject options = credentialsService.getCredentials();
             JSONArray itemsArray = itemService.buildItemToArray(subscriptionRequest.getItems());
             JSONObject body = new JSONObject();
             body.put("items", itemsArray);
@@ -118,16 +112,39 @@ public class AssinaturaController {
             }
 
         }catch (GerencianetException e){
-            System.out.println(e.getCode());
-            System.out.println(e.getError());
-            System.out.println(e.getErrorDescription());
-        }catch (Exception e) {
-            System.out.println(e.getMessage());
+            LOG.log(Level.SEVERE, e.getMessage());
+            return new ResponseEntity(e.getErrorDescription(),HttpStatus.INTERNAL_SERVER_ERROR);
+
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @ApiOperation(value = "Rota para deletar um plano passando seu id na URL")
+    @DeleteMapping(value = "/plano/deletar/{plan_id}")
+    public ResponseEntity deletarPlano(@PathVariable(value = "plan_id") String plan_id){
 
+        JSONObject options = credentialsService.getCredentials();
+
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("id", plan_id);
+
+        try {
+            Gerencianet gn = new Gerencianet(options);
+            JSONObject plan = gn.call("deletePlan", params, new JSONObject());
+
+            return new ResponseEntity(plan.toString(),HttpStatus.OK);
+        }catch (GerencianetException e){
+            LOG.log(Level.SEVERE, e.getMessage());
+            return new ResponseEntity(e.getErrorDescription(),HttpStatus.INTERNAL_SERVER_ERROR);
+
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, ex.getMessage());
+        }
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
 }

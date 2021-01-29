@@ -2,9 +2,7 @@ package br.com.gerenciapedidos.payments.api.resource;
 
 import br.com.gerencianet.gnsdk.Gerencianet;
 import br.com.gerencianet.gnsdk.exceptions.GerencianetException;
-import br.com.gerenciapedidos.payments.config.CredentialsAuthentication;
 import br.com.gerenciapedidos.payments.domain.entity.CardRequest;
-import br.com.gerenciapedidos.payments.domain.entity.Plan;
 import br.com.gerenciapedidos.payments.service.interfaces.CredentialsService;
 import br.com.gerenciapedidos.payments.service.interfaces.JsonService;
 import io.swagger.annotations.Api;
@@ -19,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @PropertySource("classpath:application.properties")
 @RestController
@@ -27,25 +27,20 @@ import java.util.HashMap;
 @CrossOrigin(origins = "*")
 public class CartaoDeCreditoController {
 
+    private static Logger LOG = Logger.getLogger(CartaoDeCreditoController.class.getName());
+
     @Autowired(required = true)
     CredentialsService credentialsService;
 
     @Autowired
     JsonService jsonService;
 
-    @Value("${app.id}")
-    private String client_id;
-    @Value("${app.secret}")
-    private String client_secret;
-    @Value("${app.sandbox}")
-    private String sandbox;
-
     @ApiOperation(value = "Realiza pagamento por cartao de credito")
     @PostMapping(value = "/pagamento/cartao", produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> pagarTransacaoComCartao(@RequestBody CardRequest cardRequest){
 
         try {
-            JSONObject options = credentialsService.buildCredentials(client_id, client_secret, sandbox);
+            JSONObject options = credentialsService.getCredentials();
             Gerencianet gn = new Gerencianet(options);
             JSONObject body = new JSONObject();
             body.put("items", new JSONArray(cardRequest.getItems()));
@@ -64,11 +59,12 @@ public class CartaoDeCreditoController {
             }
 
         } catch(GerencianetException e) {
-            System.out.println(e.getCode());
-            System.out.println(e.getError());
-            System.out.println(e.getErrorDescription());
+            LOG.log(Level.SEVERE, e.getMessage());
+            return new ResponseEntity(e.getErrorDescription(),HttpStatus.INTERNAL_SERVER_ERROR);
+
+
         } catch(Exception ex) {
-            System.out.println(ex.getMessage());
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
             return new ResponseEntity(HttpStatus.OK);
     }
