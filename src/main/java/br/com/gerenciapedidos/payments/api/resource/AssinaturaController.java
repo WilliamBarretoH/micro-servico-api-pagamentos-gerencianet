@@ -8,6 +8,7 @@ import br.com.gerenciapedidos.payments.service.interfaces.CredentialsService;
 import br.com.gerenciapedidos.payments.service.interfaces.ItemService;
 import br.com.gerenciapedidos.payments.service.interfaces.JsonService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,7 +107,7 @@ public class AssinaturaController {
                 HashMap<String, String> subscription_id = new HashMap<String, String>();
                 subscription_id.put("id", jsonService.getIdFromJsonResponse(subscription, "data", "subscription_id"));
                 JSONObject payResponse = gn.call("paySubscription", subscription_id, body);
-                return new ResponseEntity(payResponse.toString(), HttpStatus.CREATED);
+                return new ResponseEntity<JSONObject>(payResponse, HttpStatus.CREATED);
             }else{
                 return new ResponseEntity(HttpStatus.NO_CONTENT);
             }
@@ -123,7 +124,7 @@ public class AssinaturaController {
     }
 
     @ApiOperation(value = "Rota para deletar um plano passando seu id na URL")
-    @DeleteMapping(value = "/plano/deletar/{plan_id}")
+    @DeleteMapping(value = "/plano/deletar/{plan_id}", produces ="application/json", consumes ="application/json")
     public ResponseEntity deletarPlano(@PathVariable(value = "plan_id") String plan_id){
 
         JSONObject options = credentialsService.getCredentials();
