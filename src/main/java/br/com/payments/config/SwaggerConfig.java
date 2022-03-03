@@ -23,7 +23,7 @@ public class SwaggerConfig {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("br.com.gerenciapedidos.payments.api.resource"))
+                .apis(RequestHandlerSelectors.basePackage("br.com.payments.api.resource"))
                 .paths(PathSelectors.any())
                 .build().useDefaultResponseMessages(false)
                 .apiInfo(apiInfo());
@@ -32,7 +32,7 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Serviço de pagamentos")
-                .description("Serviço do GerenciaPedidos para realizar pagamentos de cartão e assinatura recorrente")
+                .description("Micro serviço integrado a API de pagamentos do Gerencianet")
                 .build();
     }
 
