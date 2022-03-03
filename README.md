@@ -1,4 +1,4 @@
-# MicroServico para cobranca do GerenciaPedidos utilizando API do GerenciaNET
+# MicroServico para cobranças via boleto, cartão de crédito e recorrência utilizando API do GerenciaNET
 
 ### Estrutura de Packages
 
@@ -10,11 +10,5 @@
 
 * Service: Todos os serviços onde estão as regras de negócio, validações e o que mais for preciso.
 
-### Atividades
-
-- [x] Rota de criar transacao.
-- [x] Retornar objeto enviado no HTTP Response.
-- [x] Variaveis de autenticacao de forma abstrata no ambiente.
-- [x] Rota de pagar transacao
-- [ ] Documentacao do Swagger  
+  
 
